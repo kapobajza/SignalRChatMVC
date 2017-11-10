@@ -1,0 +1,243 @@
+﻿@model SignalRChatMVC.ViewModels.VMChatIndex
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <script src="~/Scripts/modernizr-2.6.2.js"></script>
+    <link href="~/Content/Site.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <div class="container body-content">
+        <div style="position: absolute; top: 10px; right: 10px;">
+            @using (Html.BeginForm("Logout", "Account", FormMethod.Post))
+            {
+                <input type="submit" value="Logout" class="btn btn-info" />
+            }
+        </div>
+
+        <h2 class="text-center">Welcome to the <span id="chatName">@Model.ChatName</span> chat!</h2>
+        <hr />
+        <div class="row">
+            <div class="col-sm-4">
+                <h3 id="username" style="margin-top: 0;">@Model.UserName</h3>
+                <div class="form-group">
+                    @Html.TextAreaFor(x => x.MessageText, new { @class = "form-control", id = "msgTxt", placeholder = "Type your message here...", style = "max-width: 100%;" })
+                </div>
+
+                <div id="afterMe">
+                    <input type="button" value="Send" id="sendMsg" class="btn btn-info" />
+                </div>
+
+                <h4>Friend list</h4>
+                <div class="panel panel-default">
+                    <div class="panel-body" id="friendList">
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-8">
+                <div class="panel panel-default">
+                    <div class="panel-body chatWindow">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notifications row">
+        <div class="col-sm-6" id="notifications">
+
+        </div>
+        <div class="col-sm-6" id="friendAdd">
+
+        </div>
+    </div>
+
+    <script src="~/Scripts/jquery-3.2.1.min.js"></script>
+    <script src="~/Scripts/jquery.signalR-2.2.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="/signalr/js"></script>
+    <script type="text/javascript">
+        $(function () {
+            "use strict";
+
+            var uname = $("#username").html();
+            $.connection.hub.qs = { 'username': uname };
+            var hub = $.connection.chatHub;
+            var chatWindow = $(".chatWindow");
+
+            $.ajax({
+                url: '/Chat/LoadMessages',
+                method: 'POST',
+                success: function (messages) {
+                    $.each(messages, function (index, item) {
+                        loadMessages(item.UserName, item.Text, item.Sent);
+                    });
+                }
+            });
+
+            // SignalR Client
+            hub.client.globalSend = function (username, message, dateTime) {
+                loadMessages(username, message, dateTime);
+                chatWindow.scrollTop(chatWindow.height());
+            }
+
+            var notifications = $("#notifications");
+            var friendList = $("#friendList");
+
+            hub.client.clientConnected = function (username) {
+                if (username != uname) {
+                    notifications.append('<p id="connected">' + username + ' has just connected!</p>');
+                    changeFriendStatus(username);
+                }
+            }
+
+            hub.client.connected = function (friends) {
+                $.each(friends, function (index, item) {
+                    friendListAdd(item);
+                });
+            }
+
+            hub.client.clientDisconnected = function (username) {
+                notifications.append('<p id="connected">' + username + ' has disconnected.</p>');
+                changeFriendStatus(username);
+            }
+
+            hub.client.newFriendRequest = function (username) {
+                var btn1 = $('<button>Accept</button>');
+                var btn2 = $('<button>Decline</button>');
+                var para = $('<p></p>');
+                para.html(username + ' has added you as a friend. ');
+                para.append(btn1);
+                para.append(btn2);
+
+                btn1.click(function () {
+                    hub.server.friendRequestAccepted(username, uname).done(function () {
+                        para.fadeOut(1000, function () {
+                            para.remove();
+                        });
+                    });
+                });
+
+                btn2.click(function () {
+                    para.fadeOut(1000, function () {
+                        para.remove();
+                    });
+                });
+
+                $("#friendAdd").append(para);
+            }
+
+            hub.client.fromUserAccepted = function (user) {
+                notifications.append('<p id="connected">' + user.FriendName + ' accepted your friend request.</p>');
+                friendListAdd(user);
+            }
+
+            hub.client.toUserAccepted = function (user) {
+                friendListAdd(user);
+            }
+
+            // SignalR Server
+            var sendMsg = $("#sendMsg");
+            var msgTxt = $("#msgTxt");
+            var chatName = $("#chatName");
+
+            sendMsg.click(function () {
+                hub.server.globalSend(uname, msgTxt.val()).done(function () {
+                    msgTxt.val('');
+                });
+            });
+
+            // SignalR Start
+            $.connection.hub.start();
+
+            // Other stuff
+            $('body').on('DOMNodeInserted', function (e) {
+                var target = $(e.target);
+                if (target.attr("id") === "connected") {
+                    setTimeout(function () {
+                        target.fadeOut(500, function () {
+                            $(this).remove();
+                        });
+                    }, 3000);
+                }
+            });
+
+            function loadMessages(username, message, dateTime) {
+                var span = $("<span></span>");
+                var a1 = $("<a id='f'></a>");
+                var a2 = $("<a></a>");
+                a1.html('Add as friend');
+                a2.html('View profile');
+
+
+                span.addClass('glyphicon glyphicon-triangle-bottom');
+                span.attr("id", "dropdown");
+                span.html('<span class="dropdown-content display-none"></span>');
+
+                if (username !== uname)
+                    span.children('.dropdown-content').append(a1);
+
+                span.children('.dropdown-content').append(a2);
+                var b = $("<b></b>");
+                b.html(username);
+                var p = $("<p></p>");
+                p.append(b);
+                p.append(span);
+                p.append(' says: ' + message);
+                p.prepend(dateTime + " | ");
+
+                chatWindow.append(p);
+
+                span.click(function () {
+                    var dropdownContent = $(this).children('.dropdown-content');
+                    $('.dropdown-content').not(dropdownContent).addClass('display-none');
+                    dropdownContent.toggleClass('display-none');
+                });
+
+                a1.click(function () {
+                    var u = $(this).parent('.dropdown-content').parent('#dropdown').siblings('b').html();
+                    hub.server.friendRequest(uname, u).done(function () {
+                        var bs = $(".chatWindow").children("p").children("b");
+
+                        $.each(bs, function (index, element) {
+                            if ($(element).html() === u) {
+                                var aElement = $(element).siblings('#dropdown').children('.dropdown-content').children('#f');
+                                aElement.html('Request sent');
+                                aElement.unbind();
+                            }
+                        });
+                    });
+                });
+            }
+
+            function friendListAdd(user) {
+                var p = $('<p></p>');
+                p.addClass(user.IsOnline ? 'online' : '');
+                p.html(user.FriendName);
+
+                friendList.append(p);
+            }
+
+            function changeFriendStatus(username) {
+                var friends = friendList.children();
+                $.each(friends, function (index, item) {
+                    if ($(item).html() === username) {
+                        $(item).toggleClass('online');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+﻿body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+ul {
+    list-style-type: none;
+}
+
+.chatWindow {
+    height: 300px;
+    overflow-y: scroll;
+}
+
+.chatWindow p {
+    word-wrap: break-word;
+    width: 100%;
+}
+
+textarea {
+    resize: none;
+}
+
+.notifications {
+    height: 200px;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0 30px 30px 30px;
+}
+
+#userConnected {
+    max-height: 100%;
+    overflow-y: scroll;
+}
+
+.glyphicon-triangle-bottom {
+    color: gray !important;
+    font-size: 12px !important;
+    position: relative !important;
+}
+
+.glyphicon-triangle-bottom:hover {
+    cursor: pointer;
+}
+
+.dropdown-content {
+    display: block;
+    position: absolute;
+    font-size: 16px;
+    color: black;
+    width: 130px;
+    text-align: left;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    margin-top: 5px;
+    border: 1px solid lightgray;
+    border-radius: 8px;
+    z-index: 9999;
+    background-color: white;
+}
+
+.dropdown-content a {
+    display: block;
+    padding: 10px;
+    color: black;
+}
+
+.dropdown-content a:hover {
+    background-color: lightgray;
+    color: white;
+    border-radius: 8px;
+}
+
+.display-none {
+    display: none;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+p.online {
+    color: green !important;
+}
+
+#friendList > p {
+    color: red;
+}
