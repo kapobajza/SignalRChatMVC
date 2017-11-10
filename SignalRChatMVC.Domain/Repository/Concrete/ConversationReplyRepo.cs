@@ -10,13 +10,11 @@ using System.Threading.Tasks;
 
 namespace SignalRChatMVC.Domain.Repository.Concrete
 {
-    public class ConversationReplyRepo : IConversationReplyRepo
+    public class ConversationReplyRepo : BaseRepoEntity<ConversationReply>, IConversationReplyRepo
     {
-        private EFContext _ctx;
-
-        public ConversationReplyRepo(EFContext ctx)
+        public ConversationReplyRepo(EFContext ctx) : base(ctx)
         {
-            _ctx = ctx;
+
         }
 
         public IEnumerable<ConversationReply> ConversationReplies
@@ -37,14 +35,12 @@ namespace SignalRChatMVC.Domain.Repository.Concrete
             return _ctx.ConversationReplies.AddRange(entities);
         }
 
-        public void Dispose()
+        public override void Edit(ConversationReply entity, ConversationReply newValues)
         {
-            _ctx.Dispose();
-        }
+            base.Edit(entity, newValues);
 
-        public void Edit(ConversationReply entity, ConversationReply newValues)
-        {
-            throw new NotImplementedException();
+            if (propertyChanged)
+                _ctx.Entry(entity).State = System.Data.Entity.EntityState.Modified;
         }
 
         public IEnumerable<UserMessagesDTO> GetAllMessages(string conversation)
@@ -64,16 +60,6 @@ namespace SignalRChatMVC.Domain.Repository.Concrete
             }
 
             return tempMessages;
-        }
-
-        public void Save()
-        {
-            _ctx.SaveChanges();
-        }
-
-        public Task<int> SaveAsync()
-        {
-            return _ctx.SaveChangesAsync();
         }
     }
 }

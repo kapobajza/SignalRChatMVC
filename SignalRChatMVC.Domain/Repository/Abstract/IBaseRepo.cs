@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace SignalRChatMVC.Domain.Repository.Abstract
 {
-    public interface IRepo<T>
+    public interface IBaseRepo<T> : IDisposable
     {
-        bool Add(T entity);
-        IEnumerable<T> AddRange(IEnumerable<T> entities);
+        void SaveChanges();
+        void Edit(T entity, T newValues);
+        Task<int> SaveChangesAsync();
     }
 }

@@ -11,13 +11,11 @@ using SignalRChatMVC.Domain.DTO;
 
 namespace SignalRChatMVC.Domain.Repository.Concrete
 {
-    public class ConversationRepo : IConversationRepo
+    public class ConversationRepo : BaseRepoEntity<Conversation>, IConversationRepo
     {
-        private EFContext _ctx;
-
-        public ConversationRepo(EFContext ctx)
+        public ConversationRepo(EFContext ctx) : base(ctx)
         {
-            _ctx = ctx;
+
         }
 
         public IEnumerable<Conversation> Conversations
@@ -38,29 +36,12 @@ namespace SignalRChatMVC.Domain.Repository.Concrete
             return _ctx.Conversations.AddRange(entities);
         }
 
-        public void Dispose()
+        public override void Edit(Conversation entity, Conversation newValues)
         {
-            _ctx.Dispose();
-        }
+            base.Edit(entity, newValues);
 
-        public void Edit(Conversation entity, Conversation newValues)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Save()
-        {
-            _ctx.SaveChanges();
-        }
-
-        public Task<int> SaveAsync()
-        {
-            return _ctx.SaveChangesAsync();
-        }
-
-        public void WriteToDebugLog()
-        {
-            _ctx.Database.Log = s => System.Diagnostics.Debug.WriteLine(s);
+            if (propertyChanged)
+                _ctx.Entry(entity).State = EntityState.Modified;
         }
 
         //public IEnumerable<UserMessagesHelper> GetUserMessages()

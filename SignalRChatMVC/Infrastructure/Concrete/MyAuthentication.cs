@@ -56,7 +56,7 @@ namespace SignalRChatMVC.Infrastructure.Concrete
 
                 if (_userRepo.Add(user))
                 {
-                    _userRepo.Save();
+                    _userRepo.SaveChanges();
                     UserSession = user;
                     return true;
                 }

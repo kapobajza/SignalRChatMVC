@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SignalRChatMVC.Domain.Repository.Abstract
 {
-    public interface IFriendRepo : IRepo<Friend>
+    public interface IFriendRepo : IRepo<Friend>, IBaseRepo<Friend>
     {
         IEnumerable<Friend> Friends { get; }
         IEnumerable<UserFriendsDTO> UserFriends(string username);

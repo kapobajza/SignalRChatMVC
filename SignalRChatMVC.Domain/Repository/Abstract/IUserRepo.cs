@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SignalRChatMVC.Domain.Repository.Abstract
 {
-    public interface IUserRepo : IRepo<User>
+    public interface IUserRepo : IRepo<User>, IBaseRepo<User>
     {
         IEnumerable<User> Users { get; }
         User GetUserByUsernamePassword(string username, string password = "");

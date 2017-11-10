@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SignalRChatMVC.Domain.Repository.Abstract
 {
-    public interface IConversationReplyRepo : IRepo<ConversationReply>
+    public interface IConversationReplyRepo : IRepo<ConversationReply>, IBaseRepo<ConversationReply>
     {
         IEnumerable<ConversationReply> ConversationReplies { get; }
         IEnumerable<UserMessagesDTO> GetAllMessages(string conversationId);

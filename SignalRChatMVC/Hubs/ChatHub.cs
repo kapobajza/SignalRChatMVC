@@ -32,7 +32,7 @@ namespace SignalRChatMVC
                     var dateTime = DateTime.Now;
 
                     _conversationReplyRepo.Add(new ConversationReply() { UserId = username, Sent = dateTime, Text = message, ConversationId = "Global" });
-                    await _conversationReplyRepo.SaveAsync();
+                    await _conversationReplyRepo.SaveChangesAsync();
 
                     Clients.All.globalSend(username, message, dateTime.ToString("dd.MM.yyyy HH:mm:ss"));
                 }
@@ -51,7 +51,7 @@ namespace SignalRChatMVC
 
                 _friendRepo.AddRange(friends);
 
-                await _friendRepo.SaveAsync();
+                await _friendRepo.SaveChangesAsync();
 
                 if (_connectedUsers[toUser] != null)
                     Clients.Client(_connectedUsers[toUser].ConnectionId).newFriendRequest(fromUser);
@@ -75,7 +75,7 @@ namespace SignalRChatMVC
                         _friendRepo.Edit(friend, newFriend);
                     }
 
-                    await _friendRepo.SaveAsync();
+                    await _friendRepo.SaveChangesAsync();
 
                     if(_connectedUsers[toUser] != null)
                     {
@@ -119,7 +119,7 @@ namespace SignalRChatMVC
 
                     _userRepo.Edit(dbUser, newUser);
 
-                    _userRepo.Save();
+                    _userRepo.SaveChanges();
 
                     var userFriends = _friendRepo.UserFriends(username);
 
@@ -152,7 +152,7 @@ namespace SignalRChatMVC
 
                 _connectedUsers.TryRemove(username, out u);
 
-                await _userRepo.SaveAsync();
+                await _userRepo.SaveChangesAsync();
                 Clients.AllExcept(Context.ConnectionId).clientDisconnected(username);
             }
         }
